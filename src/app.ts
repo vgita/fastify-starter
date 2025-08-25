@@ -14,22 +14,22 @@ import swaggerPlugin from './plugins/swagger.js';
 import healthRoutes from './features/health/health.routes.js';
 
 export default async function app(
-  fastify: FastifyInstance,
-  opts: Record<string, unknown>,
+	fastify: FastifyInstance,
+	opts: Record<string, unknown>,
 ): Promise<void> {
-  // Register schemas first
-  await fastify.register(schemaLoader);
+	// Register schemas first
+	await fastify.register(schemaLoader);
 
-  // Register plugins
-  await fastify.register(corsPlugin, opts);
-  await fastify.register(rateLimitPlugin, opts);
-  await fastify.register(swaggerPlugin, opts);
+	// Register plugins
+	await fastify.register(corsPlugin, opts);
+	await fastify.register(rateLimitPlugin, opts);
+	await fastify.register(swaggerPlugin, opts);
 
-  // Register routes with API prefix
-  await fastify.register(healthRoutes, {
-    prefix: '/api',
-    ...opts,
-  });
+	// Register routes with API prefix
+	await fastify.register(healthRoutes, {
+		prefix: '/api',
+		...opts,
+	});
 }
 
 export { serverOptions as options };

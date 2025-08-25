@@ -4,39 +4,39 @@ import type { FastifyInstance } from 'fastify';
 import { buildTestServer } from '../../../../tests/helpers/test-server.js';
 
 describe('Health Routes', () => {
-  let server: FastifyInstance;
+	let server: FastifyInstance;
 
-  beforeAll(async () => {
-    server = await buildTestServer();
-  });
+	beforeAll(async () => {
+		server = await buildTestServer();
+	});
 
-  afterAll(async () => {
-    if (server) {
-      await server.close();
-    }
-  });
+	afterAll(async () => {
+		if (server) {
+			await server.close();
+		}
+	});
 
-  it('should return health status', async () => {
-    const response = await server.inject({
-      method: 'GET',
-      url: '/api/health',
-    });
+	it('should return health status', async () => {
+		const response = await server.inject({
+			method: 'GET',
+			url: '/api/health',
+		});
 
-    expect(response.statusCode).toBe(200);
+		expect(response.statusCode).toBe(200);
 
-    const body = JSON.parse(response.body);
-    expect(body).toHaveProperty('status', 'healthy');
-    expect(body).toHaveProperty('timestamp');
-    expect(body).toHaveProperty('uptime');
-    expect(body).toHaveProperty('version');
-  });
+		const body = JSON.parse(response.body);
+		expect(body).toHaveProperty('status', 'healthy');
+		expect(body).toHaveProperty('timestamp');
+		expect(body).toHaveProperty('uptime');
+		expect(body).toHaveProperty('version');
+	});
 
-  it('should return readiness status', async () => {
-    const response = await server.inject({
-      method: 'GET',
-      url: '/api/ready',
-    });
+	it('should return readiness status', async () => {
+		const response = await server.inject({
+			method: 'GET',
+			url: '/api/ready',
+		});
 
-    expect(response.statusCode).toBe(200);
-  });
+		expect(response.statusCode).toBe(200);
+	});
 });
