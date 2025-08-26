@@ -15,7 +15,7 @@ export default async function healthRoutes(
 				tags: ['health'],
 				summary: 'Health check endpoint',
 				response: {
-					200: { $ref: 'healthResponse' },
+					//	200: { $ref: 'healthResponse' },
 					500: { $ref: 'error' },
 				},
 			},
@@ -32,7 +32,8 @@ export default async function healthRoutes(
 				tags: ['health'],
 				summary: 'Readiness check endpoint',
 				response: {
-					200: { $ref: 'healthResponse' },
+					//	200: { $ref: 'healthResponse' },
+					404: { $ref: 'error' },
 					503: { $ref: 'error' },
 				},
 			},

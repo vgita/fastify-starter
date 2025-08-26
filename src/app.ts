@@ -9,6 +9,8 @@ import schemaLoader from './schemas/loader.js';
 import corsPlugin from './plugins/cors.js';
 import rateLimitPlugin from './plugins/rate-limit.js';
 import swaggerPlugin from './plugins/swagger.js';
+import errorHandler from './plugins/error-handler.js';
+import apiResponse from './plugins/api-response.js';
 
 // Import routes
 import healthRoutes from './features/health/health.routes.js';
@@ -24,6 +26,8 @@ export default async function app(
 	await fastify.register(corsPlugin, opts);
 	await fastify.register(rateLimitPlugin, opts);
 	await fastify.register(swaggerPlugin, opts);
+	await fastify.register(errorHandler, opts);
+	await fastify.register(apiResponse, opts);
 
 	// Register routes with API prefix
 	await fastify.register(healthRoutes, {

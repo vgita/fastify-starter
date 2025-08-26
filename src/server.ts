@@ -27,6 +27,7 @@ const start = async (): Promise<void> => {
 
 		await server.listen({
 			port: environment.PORT,
+			host: environment.HOST,
 		});
 	} catch (err) {
 		server.log.error(err);

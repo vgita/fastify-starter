@@ -1,9 +1,10 @@
 import type { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
 
-import { errorSchema } from './error.schema.js';
+import { errorSchema, successSchema } from './api-response.schema.js';
 
 async function schemaLoader(fastify: FastifyInstance): Promise<void> {
+	fastify.addSchema(successSchema);
 	fastify.addSchema(errorSchema);
 }
 

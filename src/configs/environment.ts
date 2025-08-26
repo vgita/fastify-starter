@@ -4,6 +4,7 @@ config();
 
 export const environment = {
 	NODE_ENV: process.env['NODE_ENV'] || 'development',
+	HOST: process.env['HOST'] || '0.0.0.0',
 	PORT: parseInt(process.env['PORT'] || '3000', 10),
 	LOG_LEVEL: process.env['LOG_LEVEL'] || 'info',
 	DATABASE_URL: process.env['DATABASE_URL'] || '',
