@@ -25,10 +25,13 @@ describe('Health Routes', () => {
 		expect(response.statusCode).toBe(200);
 
 		const body = JSON.parse(response.body);
-		expect(body).toHaveProperty('status', 'healthy');
-		expect(body).toHaveProperty('timestamp');
-		expect(body).toHaveProperty('uptime');
-		expect(body).toHaveProperty('version');
+		expect(body).toHaveProperty('data');
+
+		const data = body.data;
+		expect(data).toHaveProperty('status', 'healthy');
+		expect(data).toHaveProperty('timestamp');
+		expect(data).toHaveProperty('uptime');
+		expect(data).toHaveProperty('version');
 	});
 
 	it('should return readiness status', async () => {
