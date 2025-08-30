@@ -13,11 +13,38 @@ export const errorSchema = S.object()
 	.prop('details', S.array().items(S.string()))
 	.required(['message']);
 
-export const buildDataWrapperSchema = (
-	refSchemaId: string,
-	schema: ObjectSchema,
-): ObjectSchema =>
-	S.object()
-		.id(`schema:api:success:${refSchemaId}`)
-		.prop('isSuccess', S.boolean().default(true))
-		.prop('data', schema);
+export class ApiResponseSchemas {
+	static createSuccessResponse(
+		schemaId: string,
+		dataSchema: ObjectSchema,
+	): ObjectSchema {
+		return S.object()
+			.id(`schema:api:success:${schemaId}`)
+			.prop('isSuccess', S.boolean().const(true).default(true))
+			.prop('data', dataSchema)
+			.required(['isSuccess', 'data']);
+	}
+
+	static createErrorResponse(schemaId: string): ObjectSchema {
+		return S.object()
+			.id(`schema:api:error:${schemaId}`)
+			.prop('isSuccess', S.boolean().const(false).default(false))
+			.prop('code', S.string())
+			.prop('message', S.string())
+			.prop('details', S.array().items(S.string()))
+			.required(['isSuccess', 'message']);
+	}
+
+	static createResponseSchemas(
+		schemaId: string,
+		dataSchema: ObjectSchema,
+	): {
+		success: ObjectSchema;
+		error: ObjectSchema;
+	} {
+		return {
+			success: this.createSuccessResponse(schemaId, dataSchema),
+			error: this.createErrorResponse(schemaId),
+		};
+	}
+}
