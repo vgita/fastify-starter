@@ -1,20 +1,23 @@
-export const successSchema = {
-	$id: 'success',
-	type: 'object',
-	properties: {
-		isSuccess: { type: 'boolean' },
-		data: { type: 'object' },
-	},
-};
+import S, { ObjectSchema } from 'fluent-json-schema';
 
-export const errorSchema = {
-	$id: 'error',
-	type: 'object',
-	properties: {
-		isSuccess: { type: 'boolean' },
-		code: { type: 'string' },
-		message: { type: 'string' },
-		details: { type: 'array', items: { type: 'string' } },
-	},
-	required: ['message'],
-};
+export const successSchema = S.object()
+	.id('schema:api:success')
+	.prop('isSuccess', S.boolean())
+	.prop('data', S.object());
+
+export const errorSchema = S.object()
+	.id('schema:api:error')
+	.prop('isSuccess', S.boolean())
+	.prop('code', S.string())
+	.prop('message', S.string())
+	.prop('details', S.array().items(S.string()))
+	.required(['message']);
+
+export const buildDataWrapperSchema = (
+	refSchemaId: string,
+	schema: ObjectSchema,
+): ObjectSchema =>
+	S.object()
+		.id(`schema:api:success:${refSchemaId}`)
+		.prop('isSuccess', S.boolean().default(true))
+		.prop('data', schema);

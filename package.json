@@ -38,6 +38,7 @@
 		"dotenv": "^17.2.1",
 		"fastify": "^5.5.0",
 		"fastify-plugin": "^5.0.1",
+		"fluent-json-schema": "^6.0.0",
 		"pino": "^9.9.0"
 	},
 	"devDependencies": {

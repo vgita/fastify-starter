@@ -3,44 +3,36 @@ import type { FastifyInstance } from 'fastify';
 import { HealthService } from './health.service.js';
 import { healthResponseSchema } from './health.schema.js';
 
+const tags = ['health'];
+
 export default async function healthRoutes(
 	fastify: FastifyInstance,
 ): Promise<void> {
-	fastify.addSchema(healthResponseSchema);
-
 	fastify.get(
 		'/health',
 		{
 			schema: {
-				tags: ['health'],
+				tags: tags,
 				summary: 'Health check endpoint',
 				response: {
-					//	200: { $ref: 'healthResponse' },
-					500: { $ref: 'error' },
+					200: healthResponseSchema,
 				},
 			},
 		},
-		async () => {
-			return HealthService.getHealthStatus();
-		},
+		async () => HealthService.getHealthStatus(),
 	);
 
 	fastify.get(
 		'/ready',
 		{
 			schema: {
-				tags: ['health'],
+				tags: tags,
 				summary: 'Readiness check endpoint',
 				response: {
-					//	200: { $ref: 'healthResponse' },
-					404: { $ref: 'error' },
-					503: { $ref: 'error' },
+					200: healthResponseSchema,
 				},
 			},
 		},
-		async () => {
-			// Add your readiness checks here (database connectivity, etc.)
-			return HealthService.getHealthStatus();
-		},
+		async () => HealthService.getHealthStatus(),
 	);
 }
