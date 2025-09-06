@@ -1,50 +1,74 @@
-import S, { ObjectSchema } from 'fluent-json-schema';
+import { Type, TObject, TSchema } from '@sinclair/typebox';
 
-export const successSchema = S.object()
-	.id('schema:api:success')
-	.prop('isSuccess', S.boolean())
-	.prop('data', S.object());
+export const SuccessResponseSchema = <T extends TSchema>(
+	dataSchema: T,
+): TObject =>
+	Type.Object({
+		isSuccess: Type.Literal(true),
+		data: dataSchema,
+	});
 
-export const errorSchema = S.object()
-	.id('schema:api:error')
-	.prop('isSuccess', S.boolean())
-	.prop('code', S.string())
-	.prop('message', S.string())
-	.prop('details', S.array().items(S.string()))
-	.required(['message']);
+export const ErrorResponseSchema = Type.Object({
+	isSuccess: Type.Literal(false),
+	code: Type.Optional(Type.String()),
+	message: Type.String(),
+	details: Type.Optional(Type.Array(Type.String())),
+});
+
+export const successSchema = Type.Object(
+	{
+		isSuccess: Type.Boolean(),
+		data: Type.Object({}, { additionalProperties: true }),
+	},
+	{ $id: 'schema:api:success' },
+);
+
+export const errorSchema = Type.Object(
+	{
+		isSuccess: Type.Boolean(),
+		code: Type.String(),
+		message: Type.String(),
+		details: Type.Array(Type.String()),
+	},
+	{ $id: 'schema:api:error' },
+);
 
 export class ApiResponseSchemas {
-	static createSuccessResponse(
+	static createSuccessResponseTypebox<T extends TSchema>(
 		schemaId: string,
-		dataSchema: ObjectSchema,
-	): ObjectSchema {
-		return S.object()
-			.id(`schema:api:success:${schemaId}`)
-			.prop('isSuccess', S.boolean().const(true).default(true))
-			.prop('data', dataSchema)
-			.required(['isSuccess', 'data']);
+		dataSchema: T,
+	): TObject {
+		return Type.Object(
+			{
+				isSuccess: Type.Literal(true),
+				data: dataSchema,
+			},
+			{ $id: `schema:api:success:${schemaId}` },
+		);
 	}
 
-	static createErrorResponse(schemaId: string): ObjectSchema {
-		return S.object()
-			.id(`schema:api:error:${schemaId}`)
-			.prop('isSuccess', S.boolean().const(false).default(false))
-			.prop('code', S.string())
-			.prop('message', S.string())
-			.prop('details', S.array().items(S.string()))
-			.required(['isSuccess', 'message']);
+	static createErrorResponseTypebox(schemaId: string): TObject {
+		return Type.Object(
+			{
+				isSuccess: Type.Literal(false),
+				code: Type.Optional(Type.String()),
+				message: Type.String(),
+				details: Type.Optional(Type.Array(Type.String())),
+			},
+			{ $id: `schema:api:error:${schemaId}` },
+		);
 	}
 
-	static createResponseSchemas(
+	static createResponseSchemasTypebox<T extends TSchema>(
 		schemaId: string,
-		dataSchema: ObjectSchema,
+		dataSchema: T,
 	): {
-		success: ObjectSchema;
-		error: ObjectSchema;
+		success: TObject;
+		error: TObject;
 	} {
 		return {
-			success: this.createSuccessResponse(schemaId, dataSchema),
-			error: this.createErrorResponse(schemaId),
+			success: this.createSuccessResponseTypebox(schemaId, dataSchema),
+			error: this.createErrorResponseTypebox(schemaId),
 		};
 	}
 }

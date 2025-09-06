@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 
 import app from './app.js';
 import { environment } from './configs/environment.js';
@@ -19,7 +20,7 @@ const server = Fastify({
 			: {
 					level: environment.LOG_LEVEL,
 				},
-});
+}).withTypeProvider<TypeBoxTypeProvider>();
 
 const start = async (): Promise<void> => {
 	try {

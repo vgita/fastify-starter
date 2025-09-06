@@ -1,12 +1,7 @@
-export interface HealthStatus {
-	status: string;
-	timestamp: string;
-	uptime: number;
-	version: string;
-}
+import { HealthResponse } from './health.types.js';
 
 export class HealthService {
-	static getHealthStatus(): HealthStatus {
+	static getHealthStatus(): HealthResponse {
 		return {
 			status: 'healthy',
 			timestamp: new Date().toISOString(),

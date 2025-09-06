@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 
 import { swaggerV1Options } from '../configs/swagger.js';
 import healthV1Routes from '../features/health/v1/health.routes.js';
+import conversationV1Routes from '@/features/conversation/v1/conversation.routes.js';
 // import usersV1Routes from '../features/users/v1/users.routes.js';
 
 async function endpointsV1(
@@ -17,8 +18,11 @@ async function endpointsV1(
 		staticCSP: false,
 	});
 
-	// Register v1 routes
 	await fastify.register(healthV1Routes, { prefix: '/api/v1', ...opts });
+	await fastify.register(conversationV1Routes, {
+		prefix: '/api/v1',
+		...opts,
+	});
 	// await fastify.register(usersV1Routes, { prefix: '/api/v1', ...opts });
 }
 

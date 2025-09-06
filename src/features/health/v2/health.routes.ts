@@ -1,36 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 
 import { HealthService } from '../health.service.js';
+import { HealthV2Response, SystemStatusResponse } from '../health.types.js';
+import {
+	healthV2ResponseSchema,
+	systemStatusResponseSchema,
+} from './health.schema.js';
 
 const tags = ['health'];
-
-// Enhanced health response schema for v2
-const healthV2ResponseSchema = {
-	type: 'object',
-	properties: {
-		isSuccess: { type: 'boolean' },
-		data: {
-			type: 'object',
-			properties: {
-				status: { type: 'string', enum: ['healthy', 'unhealthy', 'degraded'] },
-				timestamp: { type: 'string', format: 'date-time' },
-				uptime: { type: 'number' },
-				version: { type: 'string' },
-				environment: { type: 'string' },
-				dependencies: {
-					type: 'object',
-					properties: {
-						database: { type: 'string', enum: ['healthy', 'unhealthy'] },
-						cache: { type: 'string', enum: ['healthy', 'unhealthy'] },
-						external_api: { type: 'string', enum: ['healthy', 'unhealthy'] },
-					},
-				},
-			},
-			required: ['status', 'timestamp', 'uptime', 'version'],
-		},
-	},
-	required: ['isSuccess', 'data'],
-};
 
 export default async function healthV2Routes(
 	fastify: FastifyInstance,
@@ -48,10 +25,11 @@ export default async function healthV2Routes(
 				},
 			},
 		},
-		async () => {
+		async (): Promise<HealthV2Response> => {
 			const basicHealth = HealthService.getHealthStatus();
 			return {
 				...basicHealth,
+				status: 'healthy',
 				environment: process.env['NODE_ENV'] || 'development',
 				dependencies: {
 					database: 'healthy',
@@ -75,10 +53,11 @@ export default async function healthV2Routes(
 				},
 			},
 		},
-		async () => {
+		async (): Promise<HealthV2Response> => {
 			const basicHealth = HealthService.getHealthStatus();
 			return {
 				...basicHealth,
+				status: 'healthy',
 				environment: process.env['NODE_ENV'] || 'development',
 				dependencies: {
 					database: 'healthy',
@@ -99,45 +78,23 @@ export default async function healthV2Routes(
 				description:
 					'Returns comprehensive system status information (new in v2)',
 				response: {
-					200: {
-						type: 'object',
-						properties: {
-							isSuccess: { type: 'boolean' },
-							data: {
-								type: 'object',
-								properties: {
-									system: {
-										type: 'object',
-										properties: {
-											memory: {
-												type: 'object',
-												properties: {
-													used: { type: 'number' },
-													total: { type: 'number' },
-													percentage: { type: 'number' },
-												},
-											},
-											cpu: { type: 'number' },
-											platform: { type: 'string' },
-											nodeVersion: { type: 'string' },
-										},
-									},
-									timestamp: { type: 'string', format: 'date-time' },
-									version: { type: 'string' },
-								},
-							},
-						},
-					},
+					200: systemStatusResponseSchema,
 				},
 			},
 		},
-		async () => {
+		async (): Promise<SystemStatusResponse> => {
 			const memUsage = process.memoryUsage();
 			return {
 				system: {
 					memory: {
-						used: Math.round((memUsage.heapUsed / 1024 / 1024) * 100) / 100,
-						total: Math.round((memUsage.heapTotal / 1024 / 1024) * 100) / 100,
+						used:
+							Math.round(
+								(memUsage.heapUsed / 1024 / 1024) * 100,
+							) / 100,
+						total:
+							Math.round(
+								(memUsage.heapTotal / 1024 / 1024) * 100,
+							) / 100,
 						percentage: Math.round(
 							(memUsage.heapUsed / memUsage.heapTotal) * 100,
 						),
