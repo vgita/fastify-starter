@@ -17,6 +17,9 @@ export default async function conversationV1Routes(
 		{
 			schema: {
 				tags,
+				summary: 'Create a new conversation',
+				description:
+					'Initiates a new conversation with the provided text and configuration.',
 				body: conversationRequestSchema,
 				response: {
 					200: conversationResponseSchema,
