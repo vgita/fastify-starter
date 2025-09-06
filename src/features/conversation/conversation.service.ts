@@ -10,10 +10,11 @@ export class ConversationService {
 	): Promise<ConversationResponse> {
 		const { text } = request.body;
 
-		const llmResponse = await request.server.llm.getCompletion(text);
+		//const llmResponse = await request.server.llm.getCompletion(text);
+		const agentResponse = await request.server.agent.runAgent(text);
 
 		return {
-			text: llmResponse,
+			text: agentResponse,
 		};
 	}
 }

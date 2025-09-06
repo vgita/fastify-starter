@@ -17,16 +17,13 @@ const getAzureOpenAiClient = (): AzureOpenAI => {
 		credential,
 		environment.AZURE_CREDENTIALS_SCOPE,
 	);
-	const options = {
+
+	return new AzureOpenAI({
 		endpoint: environment.AZURE_OPENAI_ENDPOINT,
 		azureADTokenProvider,
 		deployment: environment.AZURE_OPENAI_DEPLOYMENT_NAME,
 		apiVersion: environment.AZURE_OPENAI_API_VERSION,
-	};
-
-	const client = new AzureOpenAI(options);
-
-	return client;
+	});
 };
 
 const getCompletion = async (
@@ -55,6 +52,7 @@ const getCompletion = async (
 async function llmPlugin(fastify: FastifyInstance): Promise<void> {
 	fastify.decorate('llm', {
 		getCompletion,
+		getModel: getAzureOpenAiClient,
 	});
 }
 

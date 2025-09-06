@@ -14,6 +14,7 @@ import endpointsV1 from './plugins/endpoints-v1.js';
 import endpointsV2 from './plugins/endpoints-v2.js';
 import swaggerAggregate from './plugins/swagger-aggregate.js';
 import llmPlugin from './plugins/llm.js';
+import agentPlugin from './plugins/agent.js';
 
 // Import routes
 import apiInfoRoutes from './features/api-info/api-info.routes.js';
@@ -31,6 +32,7 @@ export default async function app(
 	await fastify.register(errorHandler, opts);
 	await fastify.register(apiResponse, opts);
 	await fastify.register(llmPlugin, opts);
+	await fastify.register(agentPlugin, opts);
 
 	// Register endpoints plugins with routes in encapsulated contexts
 	await fastify.register(endpointsV1, opts);
