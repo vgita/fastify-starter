@@ -3,6 +3,7 @@ import { Type, Static } from '@sinclair/typebox';
 export const ConversationRequestSchema = Type.Object({
 	text: Type.String({ minLength: 1 }),
 	configuration: Type.String({ minLength: 1 }),
+	useAgent: Type.Optional(Type.Boolean()),
 });
 
 export const ConversationResponseSchema = Type.Object({

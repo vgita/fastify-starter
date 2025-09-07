@@ -1,9 +1,13 @@
+import type { FastifyInstance } from 'fastify';
+import fp from 'fastify-plugin';
+import { AgentFactory } from '../features/ai/factories/agent.factory.js';
+import { ChatFactory } from '../features/ai/factories/chat.factory.js';
+import { metadata as llmMetadata } from './llm.js';
+
 import {
 	DefaultAzureCredential,
 	getBearerTokenProvider,
 } from '@azure/identity';
-import { FastifyInstance } from 'fastify';
-import fp from 'fastify-plugin';
 import { AzureOpenAI } from 'openai';
 import { environment } from '../configs/environment.js';
 
@@ -22,15 +26,21 @@ const getAzureOpenAiClient = (): AzureOpenAI => {
 	});
 };
 
-async function llmPlugin(fastify: FastifyInstance): Promise<void> {
+async function aiPlugin(fastify: FastifyInstance): Promise<void> {
 	const azureOpenAI = getAzureOpenAiClient();
 
-	fastify.decorate('azureOpenAI', azureOpenAI);
+	const chatFactory = new ChatFactory(azureOpenAI);
+	const agentFactory = new AgentFactory(azureOpenAI);
+
+	fastify.decorate('ai', {
+		chatFactory,
+		agentFactory,
+	});
 }
 
 export const metadata = {
-	name: 'llm',
-	dependencies: [],
+	name: 'ai',
+	dependencies: [llmMetadata.name],
 };
 
-export default fp(llmPlugin, metadata);
+export default fp(aiPlugin, metadata);

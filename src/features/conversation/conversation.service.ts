@@ -8,13 +8,22 @@ export class ConversationService {
 	static async createConversation(
 		request: FastifyRequest<{ Body: ConversationRequest }>,
 	): Promise<ConversationResponse> {
-		const { text } = request.body;
+		const { text, useAgent = true } = request.body;
 
-		//const llmResponse = await request.server.llm.getCompletion(text);
-		const agentResponse = await request.server.agent.runAgent(text);
+		let response: string;
+
+		if (useAgent) {
+			// Create an agent with the tools it needs
+			const agent = request.server.ai.agentFactory.createOpenAiAgent();
+
+			response = await agent.run(text);
+		} else {
+			// Use simple chat completion for basic queries
+			response = await request.server.ai.chatFactory.simpleComplete(text);
+		}
 
 		return {
-			text: agentResponse,
+			text: response,
 		};
 	}
 }
