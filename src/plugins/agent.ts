@@ -1,18 +1,64 @@
 import type { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
 import { z } from 'zod';
-import { Agent, run, tool, setDefaultOpenAIClient } from '@openai/agents';
+import {
+	Agent,
+	run,
+	tool,
+	setDefaultOpenAIClient,
+	withTrace,
+	setTraceProcessors,
+	TracingProcessor,
+} from '@openai/agents';
 
 import { metadata as llmMetadata } from './llm.js';
-import { environment } from '../configs/environment.js'; // for the deployment name, optional but handy
+import { environment } from '../configs/environment.js';
+
+import { promises as fs } from 'fs';
+import path from 'path';
+
+const TRACES_DIR = path.resolve(process.cwd(), 'traces');
+async function ensureDir(): Promise<void> {
+	await fs.mkdir(TRACES_DIR, { recursive: true });
+}
+
+const LocalFileTracingProcessor: TracingProcessor = {
+	start() {
+		void ensureDir();
+	},
+
+	async onTraceStart(_trace) {},
+
+	async onTraceEnd(trace) {
+		await ensureDir();
+		const file = path.join(TRACES_DIR, `${trace.traceId}.json`);
+		await fs.writeFile(file, JSON.stringify(trace, null, 2), 'utf-8');
+	},
+
+	async onSpanStart(_span) {},
+
+	async onSpanEnd(span) {
+		await ensureDir();
+		const line = JSON.stringify(span) + '\n';
+		await fs.appendFile(
+			path.join(TRACES_DIR, 'spans.ndjson'),
+			line,
+			'utf-8',
+		);
+	},
+
+	async forceFlush() {},
+
+	async shutdown(_timeout) {},
+};
+
+setTraceProcessors([LocalFileTracingProcessor]);
 
 const getWeatherTool = tool({
 	name: 'get_weather',
 	description: 'Get the weather for a given city',
 	parameters: z.object({ city: z.string() }),
-	execute: async (input) => {
-		return `The weather in ${input.city} is shiny`;
-	},
+	execute: async (input) => `The weather in ${input.city} is shiny`,
 });
 
 const getTimeTool = tool({
@@ -28,15 +74,12 @@ const getTimeTool = tool({
 function getAgent(fastify: FastifyInstance): Agent {
 	const azureOpenAI = fastify.llm.getModel();
 	setDefaultOpenAIClient(azureOpenAI);
-
-	const agent = new Agent({
+	return new Agent({
 		model: environment.AZURE_OPENAI_DEPLOYMENT_NAME,
 		name: 'Data agent',
 		instructions: 'You are a data agent.',
 		tools: [getWeatherTool, getTimeTool],
 	});
-
-	return agent;
 }
 
 async function runAgent(
@@ -44,8 +87,23 @@ async function runAgent(
 	prompt: string,
 ): Promise<string> {
 	const agent = getAgent(fastify);
-	const result = await run(agent, prompt);
-	return result.finalOutput ?? 'No output generated';
+
+	let resultText = 'No output generated';
+
+	await withTrace(
+		'Agent workflow',
+		async (t) => {
+			const runResult = await run(agent, prompt);
+			resultText = runResult.finalOutput ?? resultText;
+
+			t.metadata = { ...(t.metadata ?? {}), output: resultText };
+		},
+		{
+			metadata: { prompt },
+		},
+	);
+
+	return resultText;
 }
 
 async function agentPlugin(fastify: FastifyInstance): Promise<void> {
