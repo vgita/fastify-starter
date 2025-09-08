@@ -2,7 +2,6 @@ import type { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
 import { AgentFactory } from '../features/ai/factories/agent.factory.js';
 import { ChatFactory } from '../features/ai/factories/chat.factory.js';
-import { metadata as llmMetadata } from './llm.js';
 
 import {
 	DefaultAzureCredential,
@@ -40,7 +39,7 @@ async function aiPlugin(fastify: FastifyInstance): Promise<void> {
 
 export const metadata = {
 	name: 'ai',
-	dependencies: [llmMetadata.name],
+	dependencies: [],
 };
 
 export default fp(aiPlugin, metadata);

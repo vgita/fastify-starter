@@ -1,35 +1,4 @@
-export interface ChatMessage {
-	role: 'user' | 'assistant' | 'system';
-	content: string;
-}
-
-export interface ChatRequest {
-	messages: ChatMessage[];
-	model?: string;
-	temperature?: number;
-	maxTokens?: number;
-}
-
-export interface ChatResponse {
-	content: string;
-	usage?: {
-		promptTokens: number;
-		completionTokens: number;
-		totalTokens: number;
-	};
-}
-
-export interface AgentRequest {
-	prompt: string;
-	enabledTools?: string[]; // Optional tool filtering
-	context?: Record<string, unknown>;
-}
-
-export interface AgentResponse {
-	content: string;
-	toolsUsed?: string[];
-	traceId?: string;
-}
+import { TracingProcessor } from '@openai/agents';
 
 export interface AITool {
 	name: string;
@@ -38,9 +7,14 @@ export interface AITool {
 	execute: (input: Record<string, unknown>) => Promise<string>;
 }
 
-export interface AIToolResult {
-	toolName: string;
-	input: Record<string, unknown>;
-	output: string;
-	executionTime: number;
+export interface AgentConfig {
+	name: string;
+	instructions: string;
+	model: string;
+	tools: AITool[];
+	tracingDisabled: boolean;
+}
+
+export interface OpenAIAgentConfig extends AgentConfig {
+	customTraceProcessors?: TracingProcessor[];
 }

@@ -13,7 +13,6 @@ import apiResponse from './plugins/api-response.js';
 import endpointsV1 from './plugins/endpoints-v1.js';
 import endpointsV2 from './plugins/endpoints-v2.js';
 import swaggerAggregate from './plugins/swagger-aggregate.js';
-import llmPlugin from './plugins/llm.js';
 import aiPlugin from './plugins/ai.js';
 
 // Import routes
@@ -31,7 +30,6 @@ export default async function app(
 	await fastify.register(rateLimitPlugin, opts);
 	await fastify.register(errorHandler, opts);
 	await fastify.register(apiResponse, opts);
-	await fastify.register(llmPlugin, opts);
 	await fastify.register(aiPlugin, opts);
 
 	// Register endpoints plugins with routes in encapsulated contexts

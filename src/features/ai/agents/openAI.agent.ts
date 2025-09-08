@@ -4,50 +4,27 @@ import {
 	run,
 	tool,
 	setDefaultOpenAIClient,
+	setTracingDisabled,
 	withTrace,
 	setTraceProcessors,
 } from '@openai/agents';
-import type { AITool } from '../ai.types.js';
+import type { AITool, OpenAIAgentConfig } from '../ai.types.js';
 import { SomeZodObject } from 'zod';
-import LocalFileTracingProcessor from '../tracing/openAI.tracing.js';
-
-export interface AgentConfig {
-	name: string;
-	instructions: string;
-	model: string;
-	enableTracing: boolean;
-	tools: AITool[];
-}
 
 export class OpenAIAgent {
 	private agent: Agent;
 
 	constructor(
 		private openAIClient: AzureOpenAI,
-		config: AgentConfig,
+		config: OpenAIAgentConfig,
 	) {
 		setDefaultOpenAIClient(this.openAIClient);
-
-		if (config.enableTracing) {
-			setTraceProcessors([LocalFileTracingProcessor]);
-		}
-
-		const openAITools = config.tools.map((aiTool) => {
-			return tool({
-				name: aiTool.name,
-				description: aiTool.description,
-				parameters: aiTool.parameters as SomeZodObject,
-				execute: async (input) => {
-					return aiTool.execute(input as Record<string, unknown>);
-				},
-			});
-		});
-
+		this.setTracing(config);
 		this.agent = new Agent({
 			model: config.model,
 			name: config.name,
 			instructions: config.instructions,
-			tools: openAITools,
+			tools: config.tools.map(this.getOpenAiTool),
 		});
 	}
 
@@ -66,10 +43,32 @@ export class OpenAIAgent {
 				};
 			},
 			{
+				groupId: 'dummy-group', //to link multiple traces from the same conversation
 				metadata: { prompt },
 			},
 		);
 
 		return resultText;
 	}
+
+	getOpenAiTool = (aiTool: AITool): ReturnType<typeof tool> =>
+		tool({
+			name: aiTool.name,
+			description: aiTool.description,
+			parameters: aiTool.parameters as SomeZodObject,
+			execute: async (input) => {
+				return aiTool.execute(input as Record<string, unknown>);
+			},
+		});
+
+	setTracing = (config: OpenAIAgentConfig): void => {
+		if (config.tracingDisabled) {
+			setTracingDisabled(true);
+		} else {
+			setTracingDisabled(false);
+			if (config.customTraceProcessors?.length) {
+				setTraceProcessors(config.customTraceProcessors);
+			}
+		}
+	};
 }

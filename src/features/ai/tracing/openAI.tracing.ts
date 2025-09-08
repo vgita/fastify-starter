@@ -2,7 +2,7 @@ import { TracingProcessor } from '@openai/agents';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-const TRACES_DIR = path.resolve(process.cwd(), 'traces');
+const TRACES_DIR = path.resolve(process.cwd(), '.traces');
 
 async function ensureDir(): Promise<void> {
 	await fs.mkdir(TRACES_DIR, { recursive: true });
