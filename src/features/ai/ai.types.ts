@@ -18,3 +18,24 @@ export interface AgentConfig {
 export interface OpenAIAgentConfig extends AgentConfig {
 	customTraceProcessors?: TracingProcessor[];
 }
+
+export interface ChatMessage {
+	role: 'user' | 'assistant' | 'system';
+	content: string;
+}
+
+export interface ChatRequest {
+	messages: ChatMessage[];
+	model?: string;
+	temperature?: number;
+	maxTokens?: number;
+}
+
+export interface ChatResponse {
+	content: string;
+	usage?: {
+		promptTokens: number;
+		completionTokens: number;
+		totalTokens: number;
+	};
+}
