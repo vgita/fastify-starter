@@ -19,7 +19,8 @@ export class ConversationService {
 			response = await agent.run(text);
 		} else {
 			// Use simple chat completion for basic queries
-			response = await request.server.ai.chatFactory.simpleComplete(text);
+			const chat = request.server.ai.chatFactory.createOpenAiChat();
+			response = await chat.simpleComplete(text);
 		}
 
 		return {
